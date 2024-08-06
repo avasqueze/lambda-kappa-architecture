@@ -1,12 +1,16 @@
-from helper_docker import run_command_in_docker
 import time
 import subprocess
 import threading
 
 
 def run_command_in_docker(container_name, command):
+    """
+    Run a command for a container.
+
+    :param container_name: Name of the Container
+    :param command: Command that need to be processed for the container
+    """
     try:
-        # Construct the docker command
         docker_command = ["docker", "exec", container_name] + command
         print(f"Running command in container {container_name}: {' '.join(docker_command)}")
         subprocess.run(docker_command, check=True)
@@ -15,6 +19,11 @@ def run_command_in_docker(container_name, command):
 
 
 def run_commands_in_parallel(commands):
+    """
+    Running all commands parallel, to start every process in parallel.
+
+    :param commands: Commands with Container names
+    """
     threads = []
     for container_name, command in commands:
         time.sleep(10)
@@ -28,6 +37,10 @@ def run_commands_in_parallel(commands):
 
 
 def main():
+    """
+    Defining and running the commands.
+    """
+
     commands = [
         ("lambda-namenode-1", ["bash", "rewrite_mapred_site_namenode.sh"]),
         ("lambda-namenode-1", ["bash", "-c", "python3 src/kafka_to_hadoop.py"]),

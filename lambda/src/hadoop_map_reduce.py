@@ -2,6 +2,9 @@ from mrjob.job import MRJob
 import json
 
 class PurchaseCount(MRJob):
+    """
+    Map-Reduce Job for counting purchases.
+    """
 
     def mapper(self, _, line):
         data = json.loads(line)
