@@ -6,8 +6,15 @@ import logging
 
 
 def run_kafka_to_cassandra():
+    """
+    Connecting kafka to cassandra and writing yielded items to cassandra.
+    """
+
+    # Connecting to the cluster cassandra
     cassandra_cluster = Cluster(['cassandra1'], port=9042)
     cassandra_session = cassandra_cluster.connect()
+
+    # Creating a keyspace named all_data_view, where data will be written for kappa
     cassandra_session.execute(
         """
         CREATE KEYSPACE IF NOT EXISTS all_data_view
@@ -16,6 +23,7 @@ def run_kafka_to_cassandra():
     )
     cassandra_session.set_keyspace("all_data_view")
 
+    # Creating a table named all_data_view, where the data is writen directly from kafka to cassandra
     cassandra_session.execute(
         """
         CREATE TABLE IF NOT EXISTS all_data_view (
@@ -30,7 +38,7 @@ def run_kafka_to_cassandra():
         """
     )
 
-    # Kafka consumer
+    # Getting the messages from data_generator
     consumer = KafkaConsumer(
         "snack_automat_message",
         bootstrap_servers=['localhost:9092'],
@@ -39,9 +47,12 @@ def run_kafka_to_cassandra():
 
 
     def process_message_and_insert_into_cassandra(session, message):
-        # Assume message is a JSON string
+        """
+        Writing items to cassandra.
 
-        # Extract relevant fields from the message
+        :param session: Cassandra session from cassandra_cluster.connect()
+        :param message: Message from Kafka
+        """
         customer_id = message.get('customer_id')
         item = message.get('item')
         snack_automat_id = message.get('snack_automat_id')
@@ -50,7 +61,6 @@ def run_kafka_to_cassandra():
         healthy_food = message.get('healthy_food')
         price = message.get('price')
 
-        # Construct and execute a Cassandra query to insert the data
         query = session.prepare(query="""
                                         INSERT INTO all_data_view
                                         (id, item,customer_id, healthy_food, price, snack_automat_id, time_stamp)
@@ -58,11 +68,12 @@ def run_kafka_to_cassandra():
                                       """)
         session.execute(query, (item, customer_id, healthy_food, price, snack_automat_id, timestamp))
 
-
+    # Processing every kafka message and writing it to cassandra
     for message in consumer:
         msg = json.loads(message.value)
         logging.warning(msg)
         process_message_and_insert_into_cassandra(cassandra_session, msg)
 
 if __name__ == '__main__':
+    # Start Kafka to Cassandra
     run_kafka_to_cassandra()
