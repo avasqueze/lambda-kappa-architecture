@@ -133,7 +133,7 @@ Spark couldn't restart the calculation there. Overall the curve is at some
 points above the real purchases as well. Reason for this is synchronization.
 Spark needs some time to restart and to get the message to restart. Within
 this window spark is still catching messages. That's why the curve is at some
-points about the real purchases.
+points above the real purchases.
 
 ![lambda-results](./docs/lambda_results.png)
 Figure 6: Lambda Results
@@ -150,8 +150,9 @@ Figure 7: Kappa Results
 
 ### Conclusion
 
-All in all there is still no "winner" between kappa and lambda. Even though
-the implementation needs more time for lambda, lambda can be still useful.
+All in all there is still no "winner" between kappa and lambda (That was expected).
+Even though the implementation needs more time for lambda, 
+lambda can still be useful.
 
 
 (**Opinion**)
