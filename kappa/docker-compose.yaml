@@ -1,0 +1,214 @@
+version: "2.2"
+
+#################################################################################################
+# SPARK CLUSTER -- 4 NODES + 1 MASTER_NODE
+#################################################################################################
+services:
+  spark-master:
+    build:
+      dockerfile: Dockerfile-Spark
+    container_name: spark-master
+    hostname: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    networks:
+      - kappa-network
+    environment:
+      - SPARK_MODE=master
+    command: bin/spark-class org.apache.spark.deploy.master.Master -h spark-master
+    #extra_hosts:
+    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+    mem_limit: 1024m
+    volumes:
+      - ./src:/opt/bitnami/spark/src
+
+  spark-worker-1:
+    build:
+      dockerfile: Dockerfile-Spark
+    container_name: spark-worker-1
+    hostname: spark-worker-1
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_CORES=2
+    ports:
+      - "8081:8081"
+    depends_on:
+      - spark-master
+    networks:
+      - kappa-network
+    #extra_hosts:
+    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+    mem_limit: 1024m
+    volumes:
+      - ./src:/opt/bitnami/spark/src
+
+  spark-worker-2:
+    build:
+      dockerfile: Dockerfile-Spark
+    container_name: spark-worker-2
+    hostname: spark-worker-2
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_CORES=2
+    ports:
+      - "8082:8082"
+    depends_on:
+      - spark-master
+    networks:
+      - kappa-network
+    #extra_hosts:
+    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+    mem_limit: 1024m
+    volumes:
+      - ./src:/opt/bitnami/spark/src
+
+  spark-worker-3:
+    build:
+      dockerfile: Dockerfile-Spark
+    container_name: spark-worker-3
+    hostname: spark-worker-3
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_CORES=2
+    ports:
+      - "8083:8083"
+    depends_on:
+      - spark-master
+    networks:
+      - kappa-network
+    #extra_hosts:
+    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+    mem_limit: 1024m
+    volumes:
+      - ./src:/opt/bitnami/spark/src
+
+  spark-worker-4:
+    build:
+      dockerfile: Dockerfile-Spark
+    container_name: spark-worker-4
+    hostname: spark-worker-4
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_CORES=2
+    ports:
+      - "8084:8084"
+    depends_on:
+      - spark-master
+    networks:
+      - kappa-network
+    #extra_hosts:
+    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+    mem_limit: 1024m
+    volumes:
+      - ./src:/opt/bitnami/spark/src
+
+#################################################################################################
+# KAFKA + CONTROL CENTER
+#################################################################################################
+  broker:
+    build:
+      dockerfile: Dockerfile-Kafka
+    hostname: broker
+    container_name: broker
+    mem_limit: 1024m
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      # Replace CLUSTER_ID with a unique base64 UUID using "bin/kafka-storage.sh random-uuid"
+      # See https://docs.confluent.io/kafka/operations-tools/kafka-tools.html#kafka-storage-sh
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    networks:
+      - kappa-network
+    volumes:
+      - ./src:/home/appuser/src
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:7.6.1
+    hostname: control-center
+    container_name: control-center
+    mem_limit: 1024m
+    depends_on:
+      - broker
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29092'
+      CONTROL_CENTER_CONNECT_CONNECT-DEFAULT_CLUSTER: 'connect:8083'
+      CONTROL_CENTER_CONNECT_HEALTHCHECK_ENDPOINT: '/connectors'
+      CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
+      CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8088"
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021
+    networks:
+      - kappa-network
+
+#################################################################################################
+# CASSANDRA
+#################################################################################################
+  cassandra1:
+    image: cassandra:4.1.4
+    container_name: cassandra1
+    hostname: cassandra1
+    networks:
+      - kappa-network
+    ports:
+      - "9042:9042"
+    environment: &environment
+      CASSANDRA_SEEDS: "cassandra1"
+      CASSANDRA_CLUSTER_NAME: MyTestCluster
+      CASSANDRA_DC: DC1
+      CASSANDRA_RACK: RACK1
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+      CASSANDRA_NUM_TOKENS: 128
+      CASSANDRA_USER: root
+      CASSANDRA_PASSWORD: password
+    mem_limit: 8G
+
+
+#################################################################################################
+# GRAFANA
+#################################################################################################
+  visualization:
+    build:
+      dockerfile: Dockerfile-Grafana
+    ports:
+      - 3000:3000
+    networks:
+      - kappa-network
+
+#################################################################################################
+# NETWORK
+#################################################################################################
+networks:
+  kappa-network:
+    driver: bridge
+
