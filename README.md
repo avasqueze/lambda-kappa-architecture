@@ -132,7 +132,8 @@ Around 01:13:45 there is a small peak, which is above the real purchases.
 Spark couldn't restart the calculation there. Overall the curve is at some
 points above the real purchases as well. Reason for this is synchronization.
 Spark needs some time to restart and to get the message to restart. Within
-this window spark is still catching messages. 
+this window spark is still catching messages. That's why the curve is at some
+points about the real purchases.
 
 ![lambda-results](./docs/lambda_results.png)
 Figure 6: Lambda Results
@@ -152,6 +153,7 @@ Figure 7: Kappa Results
 All in all there is still no "winner" between kappa and lambda. Even though
 the implementation needs more time for lambda, lambda can be still useful.
 
+
 (**Opinion**)
 
 After implementing both of those architectures I believe, that lambda can 
@@ -161,8 +163,9 @@ can be very important to catch up the correct results. I would say the
 time to implement this kind of models could take more time for even kappa than
 lambda. Because there is always kind of backup with the batch-layer for lambda.
 But it still depends on the case. Is there a need for a fast answer or is
-it fine to wait sometime for the batch-process. If you need to react fast,
-go with kappa. If you need precise results go with lambda and take time to
-time the batch-layer results.
+it fine to wait sometime for the batch-process. If you need to react fast or 
+if you have a lot of messages and need fast scaling and passing the messages
+through the pipe, as soon as possible go with kappa. If you need precise 
+results go with lambda and take time to time the batch-layer results.
 
 
