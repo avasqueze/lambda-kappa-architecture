@@ -169,4 +169,15 @@ if you have a lot of messages and need fast scaling and passing the messages
 through the pipe, as soon as possible go with kappa. If you need precise 
 results go with lambda and take time to time the batch-layer results.
 
+### Further Tasks
+
+There is a ground for more study here. Following points are open:
+
+- "Perfect" synchronization between batch-layer and speed-layer for lamdba (airflow?).
+- More complex calculations, for example: regression (combining coefficients for
+batch-layer and speed-layer or kappa to correct the coefficient with every message a bit).
+- More RAM vs more Nodes, what happens with the results?
+- Message flow increase, decrease, what happens? When will it stack and why? 
+
+
 
