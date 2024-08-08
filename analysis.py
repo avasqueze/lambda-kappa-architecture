@@ -103,14 +103,14 @@ plt.show()
 
 def load_kappa():
 
-    all_data = pd.read_csv("data_samples\\all_data_view.csv", header=None)
-    all_data = all_data.rename(columns={7: "time",
+    all_data = pd.read_csv("data_samples\\kappa_all_data_view.csv", header=None)
+    all_data = all_data.rename(columns={6: "time",
                                         4: "ones"}).sort_values(by="time").reset_index(drop=True)
     all_data["ones"] = 1
     all_data["cummulated"] = all_data["ones"].cumsum()
     all_data["time"] = pd.to_datetime(all_data["time"])
     all_data["category"] = "all_data"
-    real = pd.read_csv("data_samples\\real_time_view.csv", header=None)
+    real = pd.read_csv("data_samples\\kappa_real_time_view.csv", header=None)
     real = real.rename(columns={3: "time",
                                  1: "cummulated"}).sort_values(by="time").reset_index(drop=True)
     real["time"] = pd.to_datetime(real["time"])
