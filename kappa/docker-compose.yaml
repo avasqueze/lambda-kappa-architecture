@@ -45,71 +45,71 @@ services:
     volumes:
       - ./src:/opt/bitnami/spark/src
 
-#  spark-worker-2:
-#    build:
-#      dockerfile: Dockerfile-Spark
-#    container_name: spark-worker-2
-#    hostname: spark-worker-2
-#    environment:
-#      - SPARK_MODE=worker
-#      - SPARK_MASTER_URL=spark://spark-master:7077
-#      - SPARK_WORKER_MEMORY=2g
-#      - SPARK_WORKER_CORES=2
-#    ports:
-#      - "8082:8082"
-#    depends_on:
-#      - spark-master
-#    networks:
-#      - kappa-network
-#    #extra_hosts:
-#    #  - "host.docker.internal:YOUR IP" probably needed for your setup
-#    mem_limit: 1024m
-#    volumes:
-#      - ./src:/opt/bitnami/spark/src
+  spark-worker-2:
+    build:
+      dockerfile: Dockerfile-Spark
+    container_name: spark-worker-2
+    hostname: spark-worker-2
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_CORES=2
+    ports:
+      - "8082:8082"
+    depends_on:
+      - spark-master
+    networks:
+      - kappa-network
+    #extra_hosts:
+    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+    mem_limit: 1024m
+    volumes:
+      - ./src:/opt/bitnami/spark/src
 
-#  spark-worker-3:
-#    build:
-#      dockerfile: Dockerfile-Spark
-#    container_name: spark-worker-3
-#    hostname: spark-worker-3
-#    environment:
-#      - SPARK_MODE=worker
-#      - SPARK_MASTER_URL=spark://spark-master:7077
-#      - SPARK_WORKER_MEMORY=2g
-#      - SPARK_WORKER_CORES=2
-#    ports:
-#      - "8083:8083"
-#    depends_on:
-#      - spark-master
-#    networks:
-#      - kappa-network
-#    #extra_hosts:
-#    #  - "host.docker.internal:YOUR IP" probably needed for your setup
-#    mem_limit: 1024m
-#    volumes:
-#      - ./src:/opt/bitnami/spark/src
+  spark-worker-3:
+    build:
+      dockerfile: Dockerfile-Spark
+    container_name: spark-worker-3
+    hostname: spark-worker-3
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_CORES=2
+    ports:
+      - "8083:8083"
+    depends_on:
+      - spark-master
+    networks:
+      - kappa-network
+    #extra_hosts:
+    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+    mem_limit: 1024m
+    volumes:
+      - ./src:/opt/bitnami/spark/src
 
-#  spark-worker-4:
-#    build:
-#      dockerfile: Dockerfile-Spark
-#    container_name: spark-worker-4
-#    hostname: spark-worker-4
-#    environment:
-#      - SPARK_MODE=worker
-#      - SPARK_MASTER_URL=spark://spark-master:7077
-#      - SPARK_WORKER_MEMORY=2g
-#      - SPARK_WORKER_CORES=2
-#    ports:
-#      - "8084:8084"
-#    depends_on:
-#      - spark-master
-#    networks:
-#      - kappa-network
-#    #extra_hosts:
-#    #  - "host.docker.internal:YOUR IP" probably needed for your setup
-#    mem_limit: 1024m
-#    volumes:
-#      - ./src:/opt/bitnami/spark/src
+  spark-worker-4:
+    build:
+      dockerfile: Dockerfile-Spark
+    container_name: spark-worker-4
+    hostname: spark-worker-4
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_CORES=2
+    ports:
+      - "8084:8084"
+    depends_on:
+      - spark-master
+    networks:
+      - kappa-network
+    #extra_hosts:
+    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+    mem_limit: 1024m
+    volumes:
+      - ./src:/opt/bitnami/spark/src
 
 #################################################################################################
 # KAFKA + CONTROL CENTER 2GB
