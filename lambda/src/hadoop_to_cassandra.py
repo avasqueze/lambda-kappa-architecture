@@ -75,6 +75,6 @@ while True:
             # writing results to cassandra
             to_cassandra(results)
         producer.send('job_restart', {"restart": "True"})
-        time.sleep(60)
+        time.sleep(10)
     except:
         pass

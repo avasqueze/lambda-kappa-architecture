@@ -1,7 +1,7 @@
 version: "2.2"
 
 #################################################################################################
-# SPARK CLUSTER -- 4 NODES + 1 MASTER_NODE
+# SPARK CLUSTER -- 4 NODES + 1 MASTER_NODE 5GB
 #################################################################################################
 services:
   spark-master:
@@ -31,7 +31,7 @@ services:
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_MEMORY=256m
       - SPARK_WORKER_CORES=2
     ports:
       - "8081:8081"
@@ -45,74 +45,74 @@ services:
     volumes:
       - ./src:/opt/bitnami/spark/src
 
-  spark-worker-2:
-    build:
-      dockerfile: Dockerfile-Spark
-    container_name: spark-worker-2
-    hostname: spark-worker-2
-    environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_MEMORY=2g
-      - SPARK_WORKER_CORES=2
-    ports:
-      - "8082:8082"
-    depends_on:
-      - spark-master
-    networks:
-      - kappa-network
-    #extra_hosts:
-    #  - "host.docker.internal:YOUR IP" probably needed for your setup
-    mem_limit: 1024m
-    volumes:
-      - ./src:/opt/bitnami/spark/src
+#  spark-worker-2:
+#    build:
+#      dockerfile: Dockerfile-Spark
+#    container_name: spark-worker-2
+#    hostname: spark-worker-2
+#    environment:
+#      - SPARK_MODE=worker
+#      - SPARK_MASTER_URL=spark://spark-master:7077
+#      - SPARK_WORKER_MEMORY=2g
+#      - SPARK_WORKER_CORES=2
+#    ports:
+#      - "8082:8082"
+#    depends_on:
+#      - spark-master
+#    networks:
+#      - kappa-network
+#    #extra_hosts:
+#    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+#    mem_limit: 1024m
+#    volumes:
+#      - ./src:/opt/bitnami/spark/src
 
-  spark-worker-3:
-    build:
-      dockerfile: Dockerfile-Spark
-    container_name: spark-worker-3
-    hostname: spark-worker-3
-    environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_MEMORY=2g
-      - SPARK_WORKER_CORES=2
-    ports:
-      - "8083:8083"
-    depends_on:
-      - spark-master
-    networks:
-      - kappa-network
-    #extra_hosts:
-    #  - "host.docker.internal:YOUR IP" probably needed for your setup
-    mem_limit: 1024m
-    volumes:
-      - ./src:/opt/bitnami/spark/src
+#  spark-worker-3:
+#    build:
+#      dockerfile: Dockerfile-Spark
+#    container_name: spark-worker-3
+#    hostname: spark-worker-3
+#    environment:
+#      - SPARK_MODE=worker
+#      - SPARK_MASTER_URL=spark://spark-master:7077
+#      - SPARK_WORKER_MEMORY=2g
+#      - SPARK_WORKER_CORES=2
+#    ports:
+#      - "8083:8083"
+#    depends_on:
+#      - spark-master
+#    networks:
+#      - kappa-network
+#    #extra_hosts:
+#    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+#    mem_limit: 1024m
+#    volumes:
+#      - ./src:/opt/bitnami/spark/src
 
-  spark-worker-4:
-    build:
-      dockerfile: Dockerfile-Spark
-    container_name: spark-worker-4
-    hostname: spark-worker-4
-    environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_MEMORY=2g
-      - SPARK_WORKER_CORES=2
-    ports:
-      - "8084:8084"
-    depends_on:
-      - spark-master
-    networks:
-      - kappa-network
-    #extra_hosts:
-    #  - "host.docker.internal:YOUR IP" probably needed for your setup
-    mem_limit: 1024m
-    volumes:
-      - ./src:/opt/bitnami/spark/src
+#  spark-worker-4:
+#    build:
+#      dockerfile: Dockerfile-Spark
+#    container_name: spark-worker-4
+#    hostname: spark-worker-4
+#    environment:
+#      - SPARK_MODE=worker
+#      - SPARK_MASTER_URL=spark://spark-master:7077
+#      - SPARK_WORKER_MEMORY=2g
+#      - SPARK_WORKER_CORES=2
+#    ports:
+#      - "8084:8084"
+#    depends_on:
+#      - spark-master
+#    networks:
+#      - kappa-network
+#    #extra_hosts:
+#    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+#    mem_limit: 1024m
+#    volumes:
+#      - ./src:/opt/bitnami/spark/src
 
 #################################################################################################
-# KAFKA + CONTROL CENTER
+# KAFKA + CONTROL CENTER 2GB
 #################################################################################################
   broker:
     build:
@@ -142,6 +142,7 @@ services:
       # Replace CLUSTER_ID with a unique base64 UUID using "bin/kafka-storage.sh random-uuid"
       # See https://docs.confluent.io/kafka/operations-tools/kafka-tools.html#kafka-storage-sh
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      KAFKA_HEAP_OPTS: '-Xmx1G -Xms1G'
     networks:
       - kappa-network
     volumes:
@@ -172,7 +173,7 @@ services:
       - kappa-network
 
 #################################################################################################
-# CASSANDRA
+# CASSANDRA 8GB
 #################################################################################################
   cassandra1:
     image: cassandra:4.1.4
