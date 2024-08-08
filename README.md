@@ -155,6 +155,7 @@ Even though the implementation needs more time for lambda,
 lambda can still be useful.
 
 
+
 (**Opinion**)
 
 After implementing both of those architectures I believe, that lambda can 
