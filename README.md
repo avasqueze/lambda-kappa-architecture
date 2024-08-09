@@ -31,12 +31,16 @@ items (apple, banana...) of any kind in sum were sold?"
 - Docker on your OS
 - Optional: Atleast 32GB RAM, but can be set up in lower scale.
 
+```
+pip install -r requirements.txt
+```
+
 ## Lambda
 
 #### Start
 ```
 cd lambda
-docker-compose up -d
+docker-compose up -d # wait until all container are running completly (around 2 Minutes)
 python start_lambda.py
 ```
 
@@ -68,7 +72,7 @@ processing spark resets and catching up from the beginning.
 #### Start
 ```
 cd kappa
-docker-compose up -d
+docker-compose up -d # wait until all container are running completly (around 2 Minutes)
 python start_kappa.py
 ```
 
