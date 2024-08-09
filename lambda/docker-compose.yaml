@@ -150,7 +150,7 @@ services:
     mem_limit: 8G
 
   #################################################################################################
-  # HADOOP CLUSTER NAMENODE + DATANODE + RESOURCEMANAGER + NODEMANAGER
+  # HADOOP CLUSTER NAMENODE + 2DATANODE + RESOURCEMANAGER + NODEMANAGER
   #################################################################################################
   namenode:
     build:
@@ -180,6 +180,18 @@ services:
     networks:
       - lambda-network
     mem_limit: 1024m
+
+  datanode2:
+    build:
+      dockerfile: Dockerfile-Hadoop
+    command: [ "hdfs", "datanode" ]
+    restart: always
+    env_file:
+      - ./config
+    networks:
+      - lambda-network
+    mem_limit: 1024m
+
   resourcemanager:
     build:
       dockerfile: Dockerfile-Hadoop

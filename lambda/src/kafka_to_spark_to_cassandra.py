@@ -10,6 +10,7 @@ import uuid
 
 os.environ['PYSPARK_SUBMIT_ARGS'] = '--packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 pyspark-shell'
 
+
 def generate_uuid():
     """
     Generating UUID for tracking what spark does every step (only needed for validation)
@@ -20,7 +21,7 @@ def generate_uuid():
 
 uuid_udf = udf(generate_uuid, StringType())
 
-def resetCountsInCassandra():
+def reset_counts_in_cassandra():
     """
     For Lambda it is needed to reset all the values in the Cassandra.
     """
@@ -49,7 +50,7 @@ def resetCountsInCassandra():
             cassandra_cluster.shutdown()
 
 
-def writeToCassandra(batch_df, batch_id):
+def write_to_cassandra(batch_df, batch_id):
     """
     Writing every batch to Cassandra
     """
@@ -94,7 +95,7 @@ def writeToCassandra(batch_df, batch_id):
         if cassandra_cluster:
             cassandra_cluster.shutdown()
 
-def startStream():
+def start_stream():
     """
     Starting the spark session. Grouping and counting items.
     """
@@ -136,13 +137,13 @@ def startStream():
     query = result_df.writeStream \
         .trigger(processingTime="2 seconds") \
         .outputMode("complete") \
-        .foreachBatch(writeToCassandra) \
+        .foreachBatch(write_to_cassandra) \
         .option("spark.cassandra.connection.host", "cassandra1") \
         .start()
 
     return query
 
-query = startStream()
+query = start_stream()
 # If batch is done, resetting values
 consumer = KafkaConsumer('job_restart', bootstrap_servers='broker:29092')
 for message in consumer:
@@ -151,5 +152,5 @@ for message in consumer:
     if restart == "True":
         query.stop()
         query.awaitTermination()
-        resetCountsInCassandra()
-        query = startStream()
+        reset_counts_in_cassandra()
+        query = start_stream()

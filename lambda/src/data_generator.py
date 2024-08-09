@@ -68,7 +68,7 @@ class SnackAutomat:
                 healthy = "healthy"
             else:
                 healthy = "not_healthy"
-            yield {"item": item,
+            yield {"item": "apple",
                    "customer_id": customer,
                    "healthy_food": healthy,
                    "price": price,

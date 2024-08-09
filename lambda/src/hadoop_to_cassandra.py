@@ -56,12 +56,13 @@ def serializer(message):
     return json.dumps(message).encode('utf-8')
 
 
-
 args = ["-r", "hadoop", "hdfs:///data.json"]
 
 # Connecting to Kafka
 producer = KafkaProducer(bootstrap_servers='broker:29092', value_serializer=serializer)
 while True:
+    start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    producer.send('job_restart', {"restart": "True"})
     results = []
     try:
         # writing to hadoop filesystem
@@ -74,7 +75,6 @@ while True:
                 results.append((key, value, timestamp))
             # writing results to cassandra
             to_cassandra(results)
-        producer.send('job_restart', {"restart": "True"})
-        time.sleep(10)
+            time.sleep(10)
     except:
         pass

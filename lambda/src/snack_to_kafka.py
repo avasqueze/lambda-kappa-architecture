@@ -30,8 +30,8 @@ def snack_to_kafka():
         for i in SnackAutomat(snack_automat_id=snack_automat_id).get_bought_items():
             producer.send("snack_automat_message", i)
             logging.warning(i)
-        time.sleep(1)
+        time.sleep(4)
 if __name__ == '__main__':
-    time.sleep(10)
+    time.sleep(20)
     snack_to_kafka()
 
