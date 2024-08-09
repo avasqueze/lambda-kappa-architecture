@@ -31,7 +31,7 @@ def snack_to_kafka():
             producer.send("snack_automat_message", i)
             logging.warning(i)
         # time.sleep(500 / number_of_snack_automats)
-        time.sleep(10)
+        time.sleep(4)
 
 
 if __name__ == '__main__':
