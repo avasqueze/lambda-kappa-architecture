@@ -20,7 +20,7 @@ def generate_uuid():
 uuid_udf = udf(generate_uuid, StringType())
 
 
-def writeToCassandra(batch_df, batch_id):
+def write_to_cassandra(batch_df, batch_id):
     """
     Writing every batch to Cassandra
     """
@@ -66,7 +66,7 @@ def writeToCassandra(batch_df, batch_id):
             cassandra_cluster.shutdown()
 
 
-def startStream():
+def start_stream():
     """
     Starting the spark session. Grouping and counting items.
     """
@@ -108,7 +108,7 @@ def startStream():
     query = result_df.writeStream \
         .trigger(processingTime="2 seconds") \
         .outputMode("complete") \
-        .foreachBatch(writeToCassandra) \
+        .foreachBatch(write_to_cassandra) \
         .option("spark.cassandra.connection.host", "cassandra1") \
         .start()
 
@@ -117,7 +117,7 @@ def startStream():
 
 if __name__ == "__main__":
     while True:
-        query = startStream()
+        query = start_stream()
         try:
             query.awaitTermination()
         except Exception as e:

@@ -178,7 +178,7 @@ There is a ground for more study here. Following points are open:
 - More complex calculations, for example: regression (combining coefficients for
 batch-layer and speed-layer or kappa to correct the coefficient with every message a bit).
 - More RAM vs more Nodes, what happens with the results?
-- Message flow increase, decrease, what happens? When will it stack and why? 
+- Message flow increase, decrease, what happens? When will it stuck and why? 
 
 
 

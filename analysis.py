@@ -19,19 +19,19 @@ def load_lambda():
 
     all_data = all_data.rename(columns={7: "time",
                                         4: "ones"}).sort_values(by="time").reset_index(drop=True)
-    all_data["cummulated"] = all_data["ones"].cumsum()
+    all_data["cumulated"] = all_data["ones"].cumsum()
     all_data["time"] = pd.to_datetime(all_data["time"])
     all_data["category"] = "all_data"
     all_data = add_offsets_to_duplicates(all_data, 'time')
 
     batch = batch.rename(columns={2: "time",
-                                  1: "cummulated"}).sort_values(by="time").reset_index(drop=True)
+                                  1: "cumulated"}).sort_values(by="time").reset_index(drop=True)
     batch["time"] = pd.to_datetime(batch["time"])
     batch["category"] = "HadoopResults"
     batch["time_diff_batch"] = batch["time"].diff()
 
     real = real.rename(columns={3: "time",
-                                1: "cummulated"}).sort_values(by="time").reset_index(drop=True)
+                                1: "cumulated"}).sort_values(by="time").reset_index(drop=True)
     real["time"] = pd.to_datetime(real["time"])
     real["category"] = "SparkResults"
     real = real.iloc[2:66].reset_index(drop=True)
@@ -42,10 +42,10 @@ def load_lambda():
         start_time = batch.loc[i, 'time']
         end_time = batch.loc[i + 1, 'time']
         interval_data = real[(real['time'] >= start_time) & (real['time'] < end_time)]
-        sum_real_time = interval_data['cummulated'].sum() + batch.loc[i, "cummulated"]
+        sum_real_time = interval_data['cumulated'].sum() + batch.loc[i, "cumulated"]
         results.append({
             'time': end_time,
-            'cummulated': sum_real_time,
+            'cumulated': sum_real_time,
             "category": "SparkResults+HadoopResults"
         })
 
@@ -63,31 +63,32 @@ def load_kappa():
     all_data = all_data.rename(columns={6: "time",
                                         4: "ones"}).sort_values(by="time").reset_index(drop=True)
     all_data["ones"] = 1
-    all_data["cummulated"] = all_data["ones"].cumsum()
+    all_data["cumulated"] = all_data["ones"].cumsum()
     all_data["time"] = pd.to_datetime(all_data["time"])
     all_data["category"] = "all_data"
 
     real = pd.read_csv("data_samples\\kappa_real_time_view.csv", header=None)
     real = real.rename(columns={3: "time",
-                                1: "cummulated"}).sort_values(by="time").reset_index(drop=True)
+                                1: "cumulated"}).sort_values(by="time").reset_index(drop=True)
     real["time"] = pd.to_datetime(real["time"])
     real["category"] = "SparkResults"
     real["time_diff_real"] = real["time"].diff()
 
     all_data = add_offsets_to_duplicates(all_data, 'time')
 
-    all_data_combined = pd.concat([all_data,
-                                   real,
-                                   ], axis=0)
+    all_data_combined = pd.concat([all_data,real], axis=0)
 
-    return all_data_combined
+    offset_data = all_data.merge(real, on="cumulated", how="outer").reset_index(drop=True)
+    offset_data["delay"] = offset_data["time_y"] - offset_data["time_x"]
+
+    return all_data_combined, offset_data
 
 # Plot for Lambda
 lambda_batch_real_combined, lambda_batch_real_separeted = load_lambda()
 
 fig = plt.figure(figsize=(15, 10))
 plt.title("Lambda Architecture", size=20)
-sns.lineplot(lambda_batch_real_combined, x="time", y="cummulated", hue="category")
+sns.lineplot(lambda_batch_real_combined, x="time", y="cumulated", hue="category")
 plt.legend(fontsize="x-large")
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
@@ -99,7 +100,7 @@ plt.show()
 
 fig = plt.figure(figsize=(15, 10))
 plt.title("Lambda Architecture", size=20)
-sns.lineplot(lambda_batch_real_separeted, x="time", y="cummulated", hue="category")
+sns.lineplot(lambda_batch_real_separeted, x="time", y="cumulated", hue="category")
 plt.legend(fontsize="x-large")
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
@@ -110,10 +111,10 @@ plt.savefig("docs\\lambda_results_batch_real.png")
 plt.show()
 
 # Plot for Kappa
-kappa_data = load_kappa()
+kappa_data, offset_data_kappa = load_kappa()
 
 fig = plt.figure(figsize=(15, 10))
-sns.lineplot(kappa_data, x="time", y="cummulated", hue="category")
+sns.lineplot(kappa_data, x="time", y="cumulated", hue="category")
 plt.title("Kappa Architecture", size=20)
 plt.legend(fontsize="x-large")
 plt.xticks(fontsize=16)
@@ -122,4 +123,8 @@ plt.xlabel('Time', fontsize=18)
 plt.ylabel('Cumulated Purchases', fontsize=18)
 plt.grid(alpha=0.2)
 plt.savefig("docs\\kappa_results.png")
+plt.show()
+
+fig = plt.figure(figsize=(15, 10))
+sns.boxplot(offset_data_kappa, x="delay")
 plt.show()

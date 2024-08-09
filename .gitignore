@@ -6,7 +6,6 @@ __pycache__/
 
 # C extensions
 *.so
-analysis.py
 
 # Distribution / packaging
 .Python
