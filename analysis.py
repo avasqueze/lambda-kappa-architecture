@@ -124,7 +124,3 @@ plt.ylabel('Cumulated Purchases', fontsize=18)
 plt.grid(alpha=0.2)
 plt.savefig("docs\\kappa_results.png")
 plt.show()
-
-fig = plt.figure(figsize=(15, 10))
-sns.boxplot(offset_data_kappa, x="delay")
-plt.show()
