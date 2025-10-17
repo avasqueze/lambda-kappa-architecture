@@ -11,7 +11,7 @@ os.environ['PYSPARK_SUBMIT_ARGS'] = '--packages org.apache.spark:spark-sql-kafka
 
 def generate_uuid():
     """
-    Generating UUID for tracking what spark does every step (only needed for validation)
+    Generando un UUID para rastrear lo que Spark hace en cada paso (solo necesario para validación).
 
     :return: UUID
     """
@@ -22,18 +22,18 @@ uuid_udf = udf(generate_uuid, StringType())
 
 def write_to_cassandra(batch_df, batch_id):
     """
-    Writing every batch to Cassandra
+    Escribiendo cada lote en Cassandra.
     """
 
     cassandra_cluster = None
     cassandra_session = None
     try:
-        # Trying to connect
+        # Intentando conectar
         cassandra_cluster = Cluster(['cassandra1'], port=9042)
         cassandra_session = cassandra_cluster.connect()
         cassandra_session.set_keyspace("all_data_view")
 
-        # Creating a table named real_time_view, where the results from spark will be stored at.
+        # Creando una tabla llamada real_time_view, donde se almacenarán los resultados de Spark.
         cassandra_session.execute(
             """
             CREATE TABLE IF NOT EXISTS real_time_view (
@@ -45,21 +45,21 @@ def write_to_cassandra(batch_df, batch_id):
             """
         )
 
-        # Adding columns
+        # Añadiendo columnas
         batch_df_with_timestamp_and_uuid = batch_df \
             .withColumn("time_stamp", current_timestamp()) \
             .withColumn("id", uuid_udf())
 
-        # Writing to cassandra directly via connector
+        # Escribiendo en Cassandra directamente a través del conector
         batch_df_with_timestamp_and_uuid.write \
             .format("org.apache.spark.sql.cassandra") \
             .options(table="real_time_view", keyspace="all_data_view") \
             .mode("append") \
             .save()
     except Exception as e:
-        print(f"Error writing to Cassandra: {e}")
+        print(f"Error al escribir en Cassandra: {e}")
     finally:
-        # If process is done, disconnecting from cassandra.
+        # Si el proceso ha terminado, desconectando de Cassandra.
         if cassandra_session:
             cassandra_session.shutdown()
         if cassandra_cluster:
@@ -68,10 +68,10 @@ def write_to_cassandra(batch_df, batch_id):
 
 def start_stream():
     """
-    Starting the spark session. Grouping and counting items.
+    Iniciando la sesión de Spark. Agrupando y contando los artículos.
     """
 
-    # Setting up Spark
+    # Configurando Spark
     spark = SparkSession.builder \
         .appName("KafkaStreamProcessing") \
         .config("spark.cassandra.connection.host", "cassandra1") \
@@ -79,7 +79,7 @@ def start_stream():
         .config("spark.master", os.environ.get("SPARK_MASTER_URL", "spark://spark-master:7077")) \
         .getOrCreate()
 
-    # Defining the data structure (like columns of the table and dtypes)
+    # Definiendo la estructura de datos (como las columnas de la tabla y los tipos de datos)
     schema = StructType([
         StructField("item", StringType()),
         StructField("customer_id", StringType()),
@@ -89,7 +89,7 @@ def start_stream():
         StructField("timestamp", StringType())
     ])
 
-    # Getting messages directly from Kafka
+    # Obteniendo los mensajes directamente de Kafka
     df = spark \
         .readStream \
         .format("kafka") \
@@ -98,13 +98,13 @@ def start_stream():
         .option("startingOffsets", "latest") \
         .load()
 
-    # Grouping and counting
+    # Agrupando y contando
     parsed_df = df.selectExpr("CAST(value AS STRING)") \
         .select(from_json(col("value"), schema).alias("data")) \
         .select("data.*")
     result_df = parsed_df.groupBy("item").count()
 
-    # Writing cassandra
+    # Escribiendo en Cassandra
     query = result_df.writeStream \
         .trigger(processingTime="2 seconds") \
         .outputMode("complete") \
@@ -124,5 +124,5 @@ if __name__ == "__main__":
             print(f"Error: {e}")
             query.stop()
             query.awaitTermination()
-            print("Restarting the stream...")
+            print("Reiniciando el stream...")
             time.sleep(5)

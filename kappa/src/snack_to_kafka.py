@@ -8,16 +8,16 @@ import logging
 
 def serializer(message):
     """
-    Encoding the message into json format.
+    Codifica el mensaje a formato JSON.
 
-    :param message: Message
+    :param message: Mensaje
     """
     return json.dumps(message).encode('utf-8')
 
 
 def snack_to_kafka():
     """
-    Generating items and producing them to kafka
+    Genera artículos y los envía a Kafka.
     """
     producer = KafkaProducer(
         bootstrap_servers=['broker:9092'],

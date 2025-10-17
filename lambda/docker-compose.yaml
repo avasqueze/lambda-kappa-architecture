@@ -1,11 +1,12 @@
 version: "2.2"
 
 #################################################################################################
-# SPARK CLUSTER -- 2 NODES + 1 MASTER_NODE
+# SPARK CLUSTER -- 2 NODoS + 1 NODO_MAESTRO
 #################################################################################################
 services:
   spark-master:
     build:
+      context: .
       dockerfile: Dockerfile-Spark
     container_name: spark-master
     hostname: spark-master
@@ -18,13 +19,14 @@ services:
       - SPARK_MODE=master
     command: bin/spark-class org.apache.spark.deploy.master.Master -h spark-master
     #extra_hosts:
-    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+    #  - "host.docker.internal:YOUR IP"
     mem_limit: 1024m
     volumes:
-      - ./src:/opt/bitnami/spark/src
+      - ./src:/opt/spark/src
 
   spark-worker-1:
     build:
+      context: .
       dockerfile: Dockerfile-Spark
     container_name: spark-worker-1
     hostname: spark-worker-1
@@ -40,13 +42,14 @@ services:
     networks:
       - lambda-network
     #extra_hosts:
-    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+    #  - "host.docker.internal:YOUR IP"
     mem_limit: 1024m
     volumes:
-      - ./src:/opt/bitnami/spark/src
+      - ./src:/opt/spark/src
 
   spark-worker-2:
     build:
+      context: .
       dockerfile: Dockerfile-Spark
     container_name: spark-worker-2
     hostname: spark-worker-2
@@ -62,16 +65,17 @@ services:
     networks:
       - lambda-network
     #extra_hosts:
-    #  - "host.docker.internal:YOUR IP" probably needed for your setup
+    #  - "host.docker.internal:YOUR IP"
     mem_limit: 1024m
     volumes:
-      - ./src:/opt/bitnami/spark/src
+      - ./src:/opt/spark/src
 
   #################################################################################################
-  # KAFKA + CONTROL CENTER
+  # KAFKA + CENTRO de CONTROL
   #################################################################################################
   broker:
     build:
+      context: .
       dockerfile: Dockerfile-Kafka
     hostname: broker
     container_name: broker
@@ -96,7 +100,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
       # Replace CLUSTER_ID with a unique base64 UUID using "bin/kafka-storage.sh random-uuid"
-      # See https://docs.confluent.io/kafka/operations-tools/kafka-tools.html#kafka-storage-sh
+      # Ver https://docs.confluent.io/kafka/operations-tools/kafka-tools.html#kafka-storage-sh
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
     networks:
       - lambda-network
@@ -150,10 +154,12 @@ services:
     mem_limit: 8G
 
   #################################################################################################
-  # HADOOP CLUSTER NAMENODE + 2DATANODE + RESOURCEMANAGER + NODEMANAGER
+  # HADOOP CLUSTER NAMENODE + 2 DATANODES + RESOURCE MANAGER + NODEMANAGER
   #################################################################################################
   namenode:
+    container_name: namenode
     build:
+      context: .
       dockerfile: Dockerfile-Hadoop
     hostname: namenode
     command: [ "/bin/bash", "-c", "hdfs namenode" ]
@@ -172,6 +178,7 @@ services:
       - ./rewrite_mapred_site_namenode.sh:/opt/hadoop/rewrite_mapred_site_namenode.sh
   datanode:
     build:
+      context: .
       dockerfile: Dockerfile-Hadoop
     command: [ "hdfs", "datanode" ]
     restart: always
@@ -183,6 +190,7 @@ services:
 
   datanode2:
     build:
+      context: .
       dockerfile: Dockerfile-Hadoop
     command: [ "hdfs", "datanode" ]
     restart: always
@@ -194,6 +202,7 @@ services:
 
   resourcemanager:
     build:
+      context: .
       dockerfile: Dockerfile-Hadoop
     hostname: resourcemanager
     command: [ "yarn", "resourcemanager" ]
@@ -207,6 +216,7 @@ services:
     mem_limit: 1024m
   nodemanager:
     build:
+      context: .
       dockerfile: Dockerfile-Hadoop
     command: [ "/bin/bash", "-c", "/rewrite_mapred_site.sh && yarn nodemanager" ]
     restart: always
@@ -223,6 +233,7 @@ services:
   #################################################################################################
   visualization:
     build:
+      context: .
       dockerfile: Dockerfile-Grafana
     ports:
       - 3000:3000

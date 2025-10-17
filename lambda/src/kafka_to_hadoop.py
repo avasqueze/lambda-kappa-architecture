@@ -19,21 +19,21 @@ output_dir = '/data.json'
 
 def commit_offsets(consumer):
     """
-    Commiting the offset.
+    Confirmando el offset.
     """
     try:
         consumer.commit()
-        logging.info("Offsets committed successfully.")
+        logging.info("Offsets confirmado adecuadamente.")
     except Exception as e:
-        logging.error(f"Error committing offsets: {e}")
+        logging.error(f"Error confirmado el offsets: {e}")
 
 while True:
     try:
-        # Collecting messages
+        # Colectando mensajes
         messages = consumer.poll(timeout_ms=1000)
 
         if messages:
-            logging.info(f"Received {sum(len(msgs) for msgs in messages.values())} messages.")
+            logging.info(f"Recibiendo {sum(len(msgs) for msgs in messages.values())} mensajes.")
             batch_data = []
 
             # Converting data for processing
@@ -53,9 +53,9 @@ while True:
 
                 commit_offsets(consumer)
         else:
-            logging.info("No messages received, sleeping for 1 second.")
+            logging.info("No hay mensajes recibidos, sleeping por 1 segundo.")
             time.sleep(1)
     except Exception as e:
-        logging.error(f"Error processing messages: {e}")
+        logging.error(f"Error procesando mensajes: {e}")
         time.sleep(5)
         commit_offsets(consumer)

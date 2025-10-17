@@ -1,8 +1,16 @@
 FROM apache/hadoop:3
 
-RUN sudo yum install -y python3 python3-pip
+USER root
 
-RUN pip3 install mrjob --user
+# Switch CentOS 7 repos to the Vault (post-EOL), then install Python 3
+RUN set -eux; \
+    sed -i 's/^mirrorlist=/#mirrorlist=/' /etc/yum.repos.d/CentOS-*.repo; \
+    sed -i 's|^#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|' /etc/yum.repos.d/CentOS-*.repo; \
+    yum -y clean all && yum -y makecache; \
+    yum -y install epel-release && yum -y install python3 python3-pip && yum clean all
+
+# Install your Python dep(s) system-wide (no --user)
+RUN pip3 install --no-cache-dir mrjob --user
 RUN pip3 install cassandra-driver --user
 RUN pip3 install kafka-python --user
 RUN pip3 install hdfs --user

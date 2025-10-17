@@ -7,14 +7,14 @@ import logging
 
 def run_kafka_to_cassandra():
     """
-    Connecting kafka to cassandra and writing yielded items to cassandra.
+    Conecta Kafka a Cassandra y escribe los artículos generados en Cassandra.
     """
 
-    # Connecting to the cluster cassandra
+    # Conectando al clúster de Cassandra
     cassandra_cluster = Cluster(['cassandra1'], port=9042)
     cassandra_session = cassandra_cluster.connect()
 
-    # Creating a keyspace named all_data_view, where data will be written for kappa
+    # Creando un keyspace llamado all_data_view, donde se escribirán los datos para kappa
     cassandra_session.execute(
         """
         CREATE KEYSPACE IF NOT EXISTS all_data_view
@@ -23,7 +23,7 @@ def run_kafka_to_cassandra():
     )
     cassandra_session.set_keyspace("all_data_view")
 
-    # Creating a table named all_data_view, where the data is writen directly from kafka to cassandra
+    # Creando una tabla llamada all_data_view, donde los datos se escriben directamente desde Kafka a Cassandra
     cassandra_session.execute(
         """
         CREATE TABLE IF NOT EXISTS all_data_view (
@@ -33,12 +33,12 @@ def run_kafka_to_cassandra():
             healthy_food VARCHAR,
             price FLOAT,
             snack_automat_id VARCHAR, 
-            time_stamp TIMESTAMP,
+            time_stamp TIMESTAMP
         )
         """
     )
 
-    # Getting the messages from data_generator
+    # Obteniendo los mensajes del generador de datos
     consumer = KafkaConsumer(
         "snack_automat_message",
         bootstrap_servers=['localhost:9092'],
@@ -48,10 +48,10 @@ def run_kafka_to_cassandra():
 
     def process_message_and_insert_into_cassandra(session, message):
         """
-        Writing items to cassandra.
+        Escribe los artículos en Cassandra.
 
-        :param session: Cassandra session from cassandra_cluster.connect()
-        :param message: Message from Kafka
+        :param session: Sesión de Cassandra desde cassandra_cluster.connect()
+        :param message: Mensaje de Kafka
         """
         customer_id = message.get('customer_id')
         item = message.get('item')
@@ -62,18 +62,18 @@ def run_kafka_to_cassandra():
         price = message.get('price')
 
         query = session.prepare(query="""
-                                        INSERT INTO all_data_view
-                                        (id, item,customer_id, healthy_food, price, snack_automat_id, time_stamp)
-                                        VALUES (uuid(), ?, ?, ?, ?, ?, ?)
+                                          INSERT INTO all_data_view
+                                          (id, item,customer_id, healthy_food, price, snack_automat_id, time_stamp)
+                                          VALUES (uuid(), ?, ?, ?, ?, ?, ?)
                                       """)
         session.execute(query, (item, customer_id, healthy_food, price, snack_automat_id, timestamp))
 
-    # Processing every kafka message and writing it to cassandra
+    # Procesando cada mensaje de Kafka y escribiéndolo en Cassandra
     for message in consumer:
         msg = json.loads(message.value)
         logging.warning(msg)
         process_message_and_insert_into_cassandra(cassandra_session, msg)
 
 if __name__ == '__main__':
-    # Start Kafka to Cassandra
+    # Iniciar Kafka a Cassandra
     run_kafka_to_cassandra()

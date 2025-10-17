@@ -11,27 +11,27 @@ def add_offsets_to_duplicates(df, time_column):
 
 def load_lambda():
     """
-    Loading csv files for lambda representation
+    Cargando archivos CSV para la representación de lambda.
     """
     all_data = pd.read_csv("data_samples/lambda_all_data_view.csv", header=None)
     batch = pd.read_csv("data_samples/lambda_batch_view.csv", header=None)
     real = pd.read_csv("data_samples/lambda_real_time_view.csv", header=None)
 
     all_data = all_data.rename(columns={7: "time",
-                                        4: "ones"}).sort_values(by="time").reset_index(drop=True)
+                                          4: "ones"}).sort_values(by="time").reset_index(drop=True)
     all_data["cumulated"] = all_data["ones"].cumsum()
     all_data["time"] = pd.to_datetime(all_data["time"])
     all_data["category"] = "all_data"
     all_data = add_offsets_to_duplicates(all_data, 'time')
 
     batch = batch.rename(columns={2: "time",
-                                  1: "cumulated"}).sort_values(by="time").reset_index(drop=True)
+                                     1: "cumulated"}).sort_values(by="time").reset_index(drop=True)
     batch["time"] = pd.to_datetime(batch["time"])
     batch["category"] = "HadoopResults"
     batch["time_diff_batch"] = batch["time"].diff()
 
     real = real.rename(columns={3: "time",
-                                1: "cumulated"}).sort_values(by="time").reset_index(drop=True)
+                                    1: "cumulated"}).sort_values(by="time").reset_index(drop=True)
     real["time"] = pd.to_datetime(real["time"])
     real["category"] = "SparkResults"
     real = real.iloc[2:66].reset_index(drop=True)
@@ -57,11 +57,11 @@ def load_lambda():
 
 def load_kappa():
     """
-    Loading csv files for kappa representation
+    Cargando archivos CSV para la representación de kappa.
     """
     all_data = pd.read_csv("data_samples\\kappa_all_data_view.csv", header=None)
     all_data = all_data.rename(columns={6: "time",
-                                        4: "ones"}).sort_values(by="time").reset_index(drop=True)
+                                          4: "ones"}).sort_values(by="time").reset_index(drop=True)
     all_data["ones"] = 1
     all_data["cumulated"] = all_data["ones"].cumsum()
     all_data["time"] = pd.to_datetime(all_data["time"])
@@ -69,7 +69,7 @@ def load_kappa():
 
     real = pd.read_csv("data_samples\\kappa_real_time_view.csv", header=None)
     real = real.rename(columns={3: "time",
-                                1: "cumulated"}).sort_values(by="time").reset_index(drop=True)
+                                    1: "cumulated"}).sort_values(by="time").reset_index(drop=True)
     real["time"] = pd.to_datetime(real["time"])
     real["category"] = "SparkResults"
     real["time_diff_real"] = real["time"].diff()
@@ -83,7 +83,7 @@ def load_kappa():
 
     return all_data_combined, offset_data
 
-# Plot for Lambda
+# Gráfico para Lambda
 lambda_batch_real_combined, lambda_batch_real_separeted = load_lambda()
 
 fig = plt.figure(figsize=(15, 10))
@@ -110,7 +110,7 @@ plt.grid(alpha=0.2)
 plt.savefig("docs\\lambda_results_batch_real.png")
 plt.show()
 
-# Plot for Kappa
+# Gráfico para Kappa
 kappa_data, offset_data_kappa = load_kappa()
 
 fig = plt.figure(figsize=(15, 10))

@@ -3,7 +3,7 @@ import json
 
 class PurchaseCount(MRJob):
     """
-    Map-Reduce Job for counting purchases.
+    Trabajo de Map-Reduce Job para conteo de compras.
     """
 
     def mapper(self, _, line):

@@ -1,3 +1,4 @@
+
 import time
 import subprocess
 import threading
@@ -5,24 +6,24 @@ import threading
 
 def run_command_in_docker(container_name, command):
     """
-    Run a command for a container.
+    Ejecuta un comando para un contenedor.
 
-    :param container_name: Name of the Container
-    :param command: Command that need to be processed for the container
+    :param container_name: Nombre del Contenedor
+    :param command: Comando que necesita ser procesado por el contenedor
     """
     try:
         docker_command = ["docker", "exec", container_name] + command
-        print(f"Running command in container {container_name}: {' '.join(docker_command)}")
+        print(f"Ejecutando comando en el contenedor {container_name}: {' '.join(docker_command)}")
         subprocess.run(docker_command, check=True)
     except subprocess.CalledProcessError as e:
-        print(f"Command '{' '.join(command)}' failed with error: {e}")
+        print(f"El comando '{' '.join(command)}' falló con el error: {e}")
 
 
 def run_commands_in_parallel(commands):
     """
-    Running all commands parallel, to start every process in parallel.
+    Ejecuta todos los comandos en paralelo, para iniciar cada proceso en paralelo.
 
-    :param commands: Commands with Container names
+    :param commands: Comandos con los nombres de los Contenedores
     """
 
     threads = []
@@ -31,7 +32,7 @@ def run_commands_in_parallel(commands):
         thread = threading.Thread(target=run_command_in_docker, args=(container_name, command))
         threads.append(thread)
         thread.start()
-        print(f"{container_name} started command {command}")
+        print(f"El contenedor {container_name} inició el comando {command}")
 
     for thread in threads:
         thread.join()
@@ -39,7 +40,7 @@ def run_commands_in_parallel(commands):
 
 def main():
     """
-    Defining and running the commands.
+    Define y ejecuta los comandos.
     """
 
     commands = [

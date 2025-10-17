@@ -1,5 +1,21 @@
-FROM bitnami/spark:3.4.3
+FROM spark:3.4.3-python3
 
-RUN pip3 install kafka-python --user
-RUN pip3 install cassandra-driver --user
-RUN pip3 install py4j --user
+# Install Python deps as root (official image defaults to user 'spark')
+USER root
+
+# (Optional but helpful) tools in case wheels aren't available for your arch
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      gcc python3-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip tooling and install your packages system-wide
+RUN python3 -m pip install --upgrade --no-cache-dir pip setuptools wheel \
+ && pip3 install --no-cache-dir kafka-python cassandra-driver
+
+# Drop back to the non-root user the image expects
+USER spark
+
+# PySpark already brings py4j; no need to install it separately
+ENV PYSPARK_PYTHON=python3
+
+

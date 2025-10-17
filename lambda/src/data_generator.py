@@ -4,7 +4,7 @@ from datetime import datetime
 
 class SnackAutomat:
     """
-    Generating/Simulating random snack purchases
+    Genera/Simula compras aleatorias de snacks.
     """
 
     def __init__(self, snack_automat_id):
@@ -18,23 +18,23 @@ class SnackAutomat:
 
     def get_price(self, snack):
         """
-        Returning the price of the snack.
+        Devuelve el precio del snack.
         """
         return self.prices[snack]
 
     def get_random_item(self):
         """
-        Getting a random key, like apple, orange, blueberries...
+        Obtiene una clave aleatoria, como apple, orange, blueberries...
 
-        :return: random choice
+        :return: elección aleatoria
         """
         return random.choice(list(self.snacks.keys()))
 
     def get_random_number_of_items(self):
         """
-        Random number of items purchased at a single time. Where the highest number is the lowest possible value.
+        Número aleatorio de artículos comprados de una sola vez. Donde al número más alto le corresponde la probabilidad más baja.
 
-        :return: Random Number between 1 and 8
+        :return: Número aleatorio entre 1 y 8
         """
         choices = [i for i in range(1, 9)]
         weights = [i for i in range(8, 0, -1)]
@@ -43,19 +43,19 @@ class SnackAutomat:
 
     def get_random_customer(self):
         """
-        Imagine we've got some customers and know who is buying it. So here we are returning the person who
-        bought an item
+        Imagina que tenemos algunos clientes y sabemos quién está comprando. Aquí devolvemos la persona que
+        compró un artículo.
 
-        :return: Number between 0 and 199
+        :return: Número entre 0 y 199
         """
         return random.randint(0, 200)
 
     def get_bought_items(self):
         """
-        Now we return a structured data, like with item, customer_id ...
-        It's a generator. Also checking if an item is healthy or not.
+        Ahora devolvemos datos estructurados, con el artículo, el ID del cliente, etc.
+        Es un generador. También comprueba si un artículo es saludable o no.
 
-        :return: Dictionary of an item as a generator
+        :return: Diccionario de un artículo como un generador
         """
 
         customer = self.get_random_customer()

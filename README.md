@@ -1,188 +1,124 @@
-# lambda-kappa-architecture
-This is an educational repository to compare lambda and kappa architecture.
-The goal is to measure the performance of lambda and kappa, learn more about docker 
-containerisation, learn more about frameworks (spark, kafka and hadoop), to implement
-lambda and kappa. Also to compare the complexity between both implementations and give 
-own feedback about both architecture, problems occured and how they got fixed.
+# Laboratorio de arquitecturas Lambda y Kappa
 
-## Introduction
+Este laboratorio nos permitira comparar la arquitectura lambda y la arquitectura kappa. El objetivo es medir el rendimiento de lambda y kappa, aprender más sobre la contenedorización con Docker, aprender más sobre frameworks (Spark, Kafka y Hadoop), e implementar lambda y kappa. También, comparar la complejidad entre ambas implementaciones y dar una opinión personal sobre ambas arquitecturas, los problemas que ocurrieron y cómo se solucionaron.
 
-Let's imagine we've got a few snack machines and we want to scale infinitly our snack machines,
-to increase our income. For this we would need some kind of data processing, to analyze our
-snack machines. 
+## Introducción
 
-EXAMPLE: We need to know:
-- What snack-machine is not profitable?
-- Where are the most people buying from?
-- Do we sell more healthy or unhealthy food?
-- ...
+Imaginemos que tenemos algunas máquinas expendedoras de snacks y queremos escalar nuestras máquinas expendedoras de forma infinita para aumentar nuestros ingresos. Para esto, necesitaríamos algún tipo de procesamiento de datos para analizar nuestras máquinas expendedoras.
 
-EXAMPLE: We need to react:
-- What snacks are empty soon and where?
-- What snack-machine gets broken?
-- ...
+EJEMPLO: Necesitamos saber:
 
-For this processing this repository shows two kinds of stream-processing implementations. 
-Lambda-Architecture and Kappa-Architecture. Focused on a simple question: "how many
-items (apple, banana...) of any kind in sum were sold?"
+  - ¿Qué máquina expendedora no es rentable?
+  - ¿Dónde compra la mayoría de la gente?
+  - ¿Vendemos más comida saludable o no saludable?
 
-## Requirements
+EJEMPLO: Necesitamos reaccionar:
 
-- Docker on your OS
-- Optional: Atleast 32GB RAM, but can be set up in lower scale.
+  - ¿Qué snacks se agotarán pronto y dónde?
+  - ¿Qué máquina expendedora se va a averiar?
+
+Para este procesamiento, este repositorio muestra dos tipos de implementaciones de procesamiento de flujos. La Arquitectura Lambda y la Arquitectura Kappa. Centradas en una pregunta simple: "¿cuántos artículos de cada tipo se vendieron en total?"
+
+## Requisitos de este Lab
+
+  - Docker en tu sistema operativo.
 
 ```
+conda create --name archs_py310 python=3.10
+conda activate archs_py310
 pip install -r requirements.txt
 ```
 
 ## Lambda
 
-#### Start
+#### Iniciar
+
 ```
 cd lambda
-docker-compose up -d # wait until all container are running completly (around 2 Minutes)
+docker-compose up -d
 python start_lambda.py
 ```
 
-After all containers are running we need to configure and start few things. 
-Within the folder \lambda\src we can find few python files. Those files are necessary 
-to generate data and tell Kafka, Spark, Hadoop and Cassandra what to do. 
+Después de que todos los contenedores estén en ejecución, necesitamos configurar e iniciar algunas cosas. Dentro de la carpeta `\lambda\src` podemos encontrar algunos archivos de Python. Esos archivos son necesarios
+para generar datos e indicarle a Kafka, Spark, Hadoop y Cassandra qué hacer.
 
 ![lambda-architecture](./docs/img/lambda-architecture.svg)
-Figure 1: Lambda-Architecture
+Figura 1: Arquitectura Lambda
 
-Whole lambda architecture is created out of few docker containers.
+Toda la arquitectura lambda está creada a partir de varios contenedores de Docker.
 
-- **Kafka** with data-generator and control-center (http://localhost:9021/) 
-- **Hadoop** as batch-layer with Namenode (http://localhost:9870/), Masternode, Datanodes 
-and Resourcemanager (http://localhost:8088/)
-- **Cassandra** for saving different views
-- **Spark** with workers and master (http://localhost:8080/)
-- **Grafana** for visualization (http://localhost:3000/)
+  - **Kafka** (http://localhost:9021/)
+  Apache Kafka es una plataforma de streaming de eventos distribuida que funciona como un sistema de mensajería de alto rendimiento, diseñada para manejar flujos masivos de datos en tiempo real. Permite que distintas aplicaciones, conocidas como "productores", publiquen grandes volúmenes de registros de datos en categorías organizadas llamadas "tópicos". A su vez, otras aplicaciones, o "consumidores", se suscriben a estos tópicos para leer y procesar la información de forma continua y ordenada. Gracias a su arquitectura escalable y tolerante a fallos, Kafka es fundamental para casos de uso como el seguimiento de actividad en sitios web, la ingesta de registros (logs), el análisis en tiempo real y la comunicación asíncrona entre microservicios.
+  - **Hadoop** como capa de lote (*batch-layer*) con Namenode (http://localhost:9870/), Masternode, Datanodes y Resourcemanager (http://localhost:8088/)
+  - **Cassandra**
+  Apache Cassandra es una base de datos NoSQL altamente escalable y distribuida, diseñada para gestionar enormes cantidades de datos a través de múltiples servidores sin un único punto de fallo. Su arquitectura descentralizada le proporciona una altísima disponibilidad y tolerancia a fallos, lo que significa que la base de datos sigue funcionando incluso si algunos de sus nodos se caen. Utiliza un modelo de datos de "columna ancha" que ofrece gran flexibilidad y está optimizada para cargas de trabajo con un volumen de escritura masivo, haciéndola ideal para aplicaciones de Big Data, Internet de las Cosas (IoT) y sistemas en tiempo real que requieren un rendimiento constante y una capacidad de crecimiento horizontal casi ilimitada.
+  - **Spark** con *workers* y *master* (http://localhost:8080/)
+  - **Grafana** (http://localhost:3000/)
+  Grafana es una plataforma de análisis y visualización interactiva de código abierto que te permite consultar, visualizar, alertar y comprender tus métricas sin importar dónde estén almacenadas. Funciona conectándose a una amplia variedad de fuentes de datos, como bases de datos (SQL y NoSQL), sistemas de monitoreo y servicios en la nube, para luego transformar esa información en paneles o dashboards dinámicos y visualmente atractivos. A través de gráficos, medidores, mapas de calor y tablas, Grafana es una herramienta fundamental para el monitoreo de aplicaciones, el análisis de rendimiento de servidores, la visualización de datos de sensores de IoT y, en general, para dar sentido a datos complejos de series de tiempo de una manera unificada y centralizada.
 
-Every container is running within same network (**lambda-network**).
+Cada contenedor se ejecuta dentro de la misma red (**lambda-network**).
 
-To validate the data and quality of the data and the results kafka is also writing 
-all data to cassandra. While hadoop is processing, spark is catching up
-new incoming data and serving them as a real-time-view. Is hadoop done
-processing spark resets and catching up from the beginning.
+Para validar los datos y la calidad de los mismos, así como los resultados, Kafka también escribe todos los datos en Cassandra. Mientras Hadoop está procesando, Spark va recogiendo los nuevos datos entrantes y los sirve como una vista en tiempo real. Cuando Hadoop termina de procesar, Spark se reinicia y comienza a recoger datos desde el principio.
 
 ## Kappa
 
-#### Start
+#### Iniciar
+
 ```
 cd kappa
-docker-compose up -d # wait until all container are running completly (around 2 Minutes)
+docker-compose up -d # espera hasta que todos los contenedores estén completamente en ejecución (alrededor de 2 minutos)
 python start_kappa.py
 ```
 
 ![lambda-architecture](./docs/img/kappa-architecture.svg)
-Figure 2: Kappa-Architecture
+Figura 2: Arquitectura Kappa
 
-Whole kappa architecture is created out of few docker containers.
+Toda la arquitectura kappa está creada a partir de varios contenedores de Docker.
 
-- **Kafka** with data-generator and control-center (http://localhost:9021/)
-- **Cassandra** for saving different views
-- **Spark** with workers and master (http://localhost:8080/)
-- **Grafana** for visualization (http://localhost:3000/)
+  - **Kafka** con generador de datos y centro de control (*control-center*) (http://localhost:9021/)
+  - **Cassandra** para guardar diferentes vistas
+  - **Spark** con *workers* y *master* (http://localhost:8080/)
+  - **Grafana** para visualización (http://localhost:3000/)
 
-## Grafana Setup
+## Configuración de Grafana
 
-To visualize the whole process you can actually use the kappa and lambda templates 
-for grafana. You cana find them in (/grafana_templates/)
+Para visualizar todo el proceso, puedes usar las plantillas de kappa y lambda
+para Grafana. Puedes encontrarlas en (`/grafana_templates/`)
 
-### Connect to Apache Cassandra
+### Conección a Apache Cassandra
 
-1. Go to http://localhost:3000
-2. login (username=admin, password=admin) # can be changed
-3. Go to Connections -> Add new connection -> Apache Cassandra -> Install
-4. Go to Connections -> Data sources -> Apache Cassandra
-5. Fill up following entry -- Host: cassandra1:9042
-6. Save & Test
+1.  Ve a http://localhost:3000
+2.  Inicia sesión (usuario=admin, contraseña=admin) \# se puede cambiar
+3.  Ve a Connections -\> Add new connection -\> Apache Cassandra -\> Install
+4.  Ve a Connections -\> Data sources -\> Apache Cassandra
+5.  Rellena la siguiente entrada -- Host: cassandra1:9042
+6.  Save & Test
 
-### Lambda Dashboard
+### Dashboard de Lambda
 
 ![lambda-architecture](./docs/img/lambda_dashboard.png)
-Figure 3: Lambda Dashboard
+Figura 3: Dashboard de Lambda
 
-Lambda dashboard is showing Real Time, Batch and Validation View. Real Time View + Batch View should be
-Validation View.
+El Dashboard de Lambda muestra la Vista en Tiempo Real (*Real Time View*), la Vista de Lote (*Batch View*) y la Vista de Validación (*Validation View*). La Vista en Tiempo Real + la Vista de Lote deberían ser iguales a la Vista de Validación.
 
-### Kappa Dashboard
+### Panel de Kappa
 
 ![lambda-architecture](./docs/img/kappa_dashboard.png)
-Figure 4: Kappa Dashboard
+Figura 4: Dashboard de Kappa
 
-Similar to lambda dashboard, kappa dashboard show the Real Time View and the Validation View. 
-Real Time View should be the same as the Validation View. 
+Similar al panel de lambda, el panel de kappa muestra la Vista en Tiempo Real y la Vista de Validación. La Vista en Tiempo Real debería ser igual a la Vista de Validación.
 
+### Pregunta a responder
 
+¿Se necesita una respuesta rápida o está bien esperar un tiempo para el proceso por lotes? 
 
+Si necesitas reaccionar rápido o si tienes muchos mensajes y necesitas escalar y pasar los mensajes a través del sistema lo antes posible, elige kappa. Si necesitas resultados precisos, elige lambda y tómate el tiempo para los resultados de la capa de lote.
 
-## Analysis and Comparison
+### Tareas Futuras
 
-### Lambda
+Hay campo para más estudio aquí. Los siguientes puntos están abiertos:
 
-In Figure 5 and Figure 6 the blue curve represents the real purchases. In 
-Figure 5 there is a small delay for the Batch-View (HadoopResults) to catch up
-the real purchases. Meanwhile Real-View (SparkResults) is catching up missing
-values.
-
-![lambda-results](./docs/lambda_results_batch_real.png)
-Figure 5: Lambda Results
-
-Figure 6 represents Batch-View + Real-View. Where both results are summed up.
-Around 01:13:45 there is a small peak, which is above the real purchases. 
-Spark couldn't restart the calculation there. Overall the curve is at some
-points above the real purchases as well. Reason for this is synchronization.
-Spark needs some time to restart and to get the message to restart. Within
-this window spark is still catching messages. That's why the curve is at some
-points above the real purchases.
-
-![lambda-results](./docs/lambda_results.png)
-Figure 6: Lambda Results
-
-### Kappa
-
-Figure 7 represents results for the kappa-architecture. Compared to lambda
-there is more consistence. Explained by no need of two layers, easier 
-implementation and no parallel processing. Also, no communication between
-multiple layer is needed, no synchronization. 
-
-![kappa-results](./docs/kappa_results.png)
-Figure 7: Kappa Results
-
-### Conclusion
-
-All in all there is still no "winner" between kappa and lambda (That was expected).
-Even though the implementation needs more time for lambda, 
-lambda can still be useful.
-
-
-
-(**Opinion**)
-
-After implementing both of those architectures I believe, that lambda can 
-be better for more complex calculations. Let's take simple Regression
-or even something more complex like ARIMA modeling. I believe the batch-layer
-can be very important to catch up the correct results. I would say the
-time to implement this kind of models could take more time for even kappa than
-lambda. Because there is always kind of backup with the batch-layer for lambda.
-But it still depends on the case. Is there a need for a fast answer or is
-it fine to wait sometime for the batch-process. If you need to react fast or 
-if you have a lot of messages and need fast scaling and passing the messages
-through the pipe, as soon as possible go with kappa. If you need precise 
-results go with lambda and take time to time the batch-layer results.
-
-### Further Tasks
-
-There is a ground for more study here. Following points are open:
-
-- "Perfect" synchronization between batch-layer and speed-layer for lamdba (airflow?).
-- More complex calculations, for example: regression (combining coefficients for
-batch-layer and speed-layer or kappa to correct the coefficient with every message a bit).
-- More RAM vs more Nodes, what happens with the results?
-- Message flow increase, decrease, what happens? When will it stuck and why? 
-
-
-
+  - Sincronización entre la capa de lote (*batch-layer*) y la capa de velocidad (*speed-layer*) para lambda (explorar la herramienta airflow).
+  - Cálculos más complejos, por ejemplo: ARIMA o ML.
+  - Más RAM vs. más Nodos, ¿qué pasa con los resultados?
+  - Aumento o disminución del flujo de mensajes, ¿qué sucede? ¿Cuándo se atascará y por qué?
